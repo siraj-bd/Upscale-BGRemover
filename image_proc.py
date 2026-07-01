@@ -77,29 +77,53 @@ def FB_blur_fusion_foreground_estimator_gpu_2(image, alpha, r=90):
     return FB_blur_fusion_foreground_estimator_gpu(image, FG, blur_B, alpha, r=6)[0]
 
 
-def refine_foreground(image, mask, r=90, device='cuda'):
+def refine_foreground(image, mask, r=90, device=None):
     """both image and mask are in range of [0, 1]"""
+
     if mask.size != image.size:
         mask = mask.resize(image.size)
 
-    if device == 'cuda':
-        image = transforms.functional.to_tensor(image).float().cuda()
-        mask = transforms.functional.to_tensor(mask).float().cuda()
+    if device is None:
+        if torch.backends.mps.is_available():
+            device = "mps"
+        elif torch.cuda.is_available():
+            device = "cuda"
+        else:
+            device = "cpu"
+
+    if device != "cpu":
+        image = transforms.functional.to_tensor(image).float().to(device)
+        mask = transforms.functional.to_tensor(mask).float().to(device)
+
         image = image.unsqueeze(0)
         mask = mask.unsqueeze(0)
 
-        estimated_foreground = FB_blur_fusion_foreground_estimator_gpu_2(image, mask, r=r)
-        
+        estimated_foreground = FB_blur_fusion_foreground_estimator_gpu_2(
+            image, mask, r=r
+        )
+
         estimated_foreground = estimated_foreground.squeeze()
-        estimated_foreground = (estimated_foreground.mul(255.0)).to(torch.uint8)
-        estimated_foreground = estimated_foreground.permute(1, 2, 0).contiguous().cpu().numpy().astype(np.uint8)
+        estimated_foreground = (estimated_foreground * 255).to(torch.uint8)
+        estimated_foreground = (
+            estimated_foreground.permute(1, 2, 0)
+            .contiguous()
+            .cpu()
+            .numpy()
+            .astype(np.uint8)
+        )
+
     else:
         image = np.array(image, dtype=np.float32) / 255.0
         mask = np.array(mask, dtype=np.float32) / 255.0
-        estimated_foreground = FB_blur_fusion_foreground_estimator_cpu_2(image, mask, r=r)
-        estimated_foreground = (estimated_foreground * 255.0).astype(np.uint8)
 
-    estimated_foreground = Image.fromarray(np.ascontiguousarray(estimated_foreground))
+        estimated_foreground = FB_blur_fusion_foreground_estimator_cpu_2(
+            image, mask, r=r
+        )
+        estimated_foreground = (estimated_foreground * 255).astype(np.uint8)
+
+    estimated_foreground = Image.fromarray(
+        np.ascontiguousarray(estimated_foreground)
+    )
 
     return estimated_foreground
 
