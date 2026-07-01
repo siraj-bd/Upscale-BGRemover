@@ -150,3 +150,26 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Test Images
+
+# Project Files
+
+# Generated Output
+output/*
+!output/.gitkeep
+
+debug/*
+!debug/.gitkeep
+
+# Input Images
+input/*
+!input/.gitkeep
+
+# Temporary Python Files
+*_backup.py
+*_v0.py
+
+# Local Models
+models/*
+!models/.gitkeep
