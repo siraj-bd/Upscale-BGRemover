@@ -80,6 +80,24 @@ def save_image(img, output_path):
     ).save(output_path)
 
 
+def normalize_to_square(img):
+    h, w = img.shape[:2]
+
+    size = max(h, w)
+
+    canvas = np.zeros(
+        (size, size, 4),
+        dtype=np.uint8,
+    )
+
+    x = (size - w) // 2
+    y = (size - h) // 2
+
+    canvas[y:y + h, x:x + w] = img
+
+    return canvas
+
+
 def save_debug_image(img, x, y, r):
     debug = img.copy()
 
@@ -93,6 +111,8 @@ def main():
     input_path, output_path = validate_arguments()
 
     img = load_image(input_path)
+
+    img = normalize_to_square(img)
 
     x, y, r = detect_circle(img)
 
