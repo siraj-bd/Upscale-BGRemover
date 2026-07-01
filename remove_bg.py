@@ -60,12 +60,23 @@ def detect_circle(img):
     return max(circles, key=lambda c: c[2])
 
 
-def create_mask(shape, x, y, r):
-    mask = np.zeros(shape, dtype=np.uint8)
+def create_mask(img, x, y, r):
+    mask = np.zeros(img.shape[:2], dtype=np.uint8)
 
     cv2.circle(mask, (x, y), r - 3, 255, -1)
 
     return mask
+
+
+def crop_to_circle(img, x, y, r):
+    padding = max(10, int(r * 0.03))
+
+    left = max(x - r - padding, 0)
+    top = max(y - r - padding, 0)
+    right = min(x + r + padding, img.shape[1])
+    bottom = min(y + r + padding, img.shape[0])
+
+    return img[top:bottom, left:right]
 
 
 def apply_mask(img, mask):
@@ -116,9 +127,11 @@ def main():
 
     x, y, r = detect_circle(img)
 
-    gray = cv2.cvtColor(img[:, :, :3], cv2.COLOR_BGR2GRAY)
+    img = crop_to_circle(img, x, y, r)
 
-    mask = create_mask(gray.shape, x, y, r)
+    x, y, r = detect_circle(img)
+
+    mask = create_mask(img, x, y, r)
 
     img = apply_mask(img, mask)
 
