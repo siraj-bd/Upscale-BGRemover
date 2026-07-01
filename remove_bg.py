@@ -53,13 +53,25 @@ def detect_circle(img):
 
 img = load_image(input_path)
 
+def create_mask(shape, x, y, r):
+    mask = np.zeros(shape, dtype=np.uint8)
+
+    cv2.circle(
+        mask,
+        (x, y),
+        r - 3,
+        255,
+        -1,
+    )
+
+    return mask
+
+
 x, y, r = detect_circle(img)
 
 gray = cv2.cvtColor(img[:, :, :3], cv2.COLOR_BGR2GRAY)
 
-mask = np.zeros(gray.shape, dtype=np.uint8)
-
-cv2.circle(mask, (x, y), r - 3, 255, -1)
+mask = create_mask(gray.shape, x, y, r)
 
 img[:, :, 3] = mask
 
