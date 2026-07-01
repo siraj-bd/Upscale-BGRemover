@@ -78,11 +78,14 @@ def apply_mask(img, mask):
 
 mask = create_mask(gray.shape, x, y, r)
 
+def save_image(img, output_path):
+    Image.fromarray(
+        cv2.cvtColor(img, cv2.COLOR_BGRA2RGBA)
+    ).save(output_path)
+
 img = apply_mask(img, mask)
 
-Image.fromarray(
-    cv2.cvtColor(img, cv2.COLOR_BGRA2RGBA)
-).save(output_path)
+save_image(img, output_path)
 
 debug = img.copy()
 cv2.circle(debug, (x, y), r, (0, 0, 255, 255), 6)
