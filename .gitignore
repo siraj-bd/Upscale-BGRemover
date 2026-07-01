@@ -172,4 +172,4 @@ input/*
 
 # Local Models
 models/*
-!models/.gitkeep
+!models/.gitkeepBiRefNet/
