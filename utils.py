@@ -8,25 +8,24 @@ import cv2
 from PIL import Image
 
 
-def path_to_image(path, size=(1024, 1024), color_type=['rgb', 'gray'][0]):
-    if color_type.lower() == 'rgb':
+def path_to_image(path, size=(1024, 1024), color_type=["rgb", "gray"][0]):
+    if color_type.lower() == "rgb":
         image = cv2.imread(path)
-    elif color_type.lower() == 'gray':
+    elif color_type.lower() == "gray":
         image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
     else:
-        print('Select the color_type to return, either to RGB or gray image.')
+        print("Select the color_type to return, either to RGB or gray image.")
         return
     if size:
         image = cv2.resize(image, size, interpolation=cv2.INTER_LINEAR)
-    if color_type.lower() == 'rgb':
-        image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)).convert('RGB')
+    if color_type.lower() == "rgb":
+        image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)).convert("RGB")
     else:
-        image = Image.fromarray(image).convert('L')
+        image = Image.fromarray(image).convert("L")
     return image
 
 
-
-def check_state_dict(state_dict, unwanted_prefixes=['module.', '_orig_mod.']):
+def check_state_dict(state_dict, unwanted_prefixes=["module.", "_orig_mod."]):
     for k, v in list(state_dict.items()):
         prefix_length = 0
         for unwanted_prefix in unwanted_prefixes:
@@ -38,25 +37,29 @@ def check_state_dict(state_dict, unwanted_prefixes=['module.', '_orig_mod.']):
 
 def generate_smoothed_gt(gts):
     epsilon = 0.001
-    new_gts = (1-epsilon)*gts+epsilon/2
+    new_gts = (1 - epsilon) * gts + epsilon / 2
     return new_gts
 
 
-class Logger():
+class Logger:
     def __init__(self, path="log.txt"):
-        self.logger = logging.getLogger('BiRefNet')
+        self.logger = logging.getLogger("BiRefNet")
         self.file_handler = logging.FileHandler(path, "w")
         self.stdout_handler = logging.StreamHandler()
-        self.stdout_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
-        self.file_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
+        self.stdout_handler.setFormatter(
+            logging.Formatter("%(asctime)s %(levelname)s %(message)s")
+        )
+        self.file_handler.setFormatter(
+            logging.Formatter("%(asctime)s %(levelname)s %(message)s")
+        )
         self.logger.addHandler(self.file_handler)
         self.logger.addHandler(self.stdout_handler)
         self.logger.setLevel(logging.INFO)
         self.logger.propagate = False
-    
+
     def info(self, txt):
         self.logger.info(txt)
-    
+
     def close(self):
         self.file_handler.close()
         self.stdout_handler.close()
@@ -64,6 +67,7 @@ class Logger():
 
 class AverageMeter(object):
     """Computes and stores the average and current value"""
+
     def __init__(self):
         self.reset()
 

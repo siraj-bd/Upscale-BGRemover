@@ -8,7 +8,6 @@ from engines.birefnet import BiRefNetEngine
 
 from engines.base import BaseEngine
 
-
 ENGINES: dict[str, type[BaseEngine]] = {
     "birefnet": BiRefNetEngine,
 }

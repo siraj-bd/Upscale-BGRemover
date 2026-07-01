@@ -10,28 +10,15 @@ import argparse
 
 def main():
     parser = argparse.ArgumentParser(
-        prog="bground",
-        description="Professional AI Background Removal Tool"
+        prog="bground", description="Professional AI Background Removal Tool"
     )
 
-    parser.add_argument(
-        "input",
-        nargs="?",
-        help="Input image or folder"
-    )
+    parser.add_argument("input", nargs="?", help="Input image or folder")
+
+    parser.add_argument("-o", "--output", default="output", help="Output folder")
 
     parser.add_argument(
-        "-o",
-        "--output",
-        default="output",
-        help="Output folder"
-    )
-
-    parser.add_argument(
-        "--engine",
-        default="birefnet",
-        choices=["birefnet"],
-        help="AI Engine"
+        "--engine", default="birefnet", choices=["birefnet"], help="AI Engine"
     )
 
     args = parser.parse_args()

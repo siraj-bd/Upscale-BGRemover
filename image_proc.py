@@ -43,9 +43,17 @@ def mean_blur(x, kernel_size):
     else:
         pad_l = pad_r = pad_t = pad_b = kernel_size // 2
 
-    x_padded = torch.nn.functional.pad(x, (pad_l, pad_r, pad_t, pad_b), mode='replicate')
+    x_padded = torch.nn.functional.pad(
+        x, (pad_l, pad_r, pad_t, pad_b), mode="replicate"
+    )
 
-    return torch.nn.functional.avg_pool2d(x_padded, kernel_size=(kernel_size, kernel_size), stride=1, count_include_pad=False)
+    return torch.nn.functional.avg_pool2d(
+        x_padded,
+        kernel_size=(kernel_size, kernel_size),
+        stride=1,
+        count_include_pad=False,
+    )
+
 
 def FB_blur_fusion_foreground_estimator_gpu(image, FG, B, alpha, r=90):
     as_dtype = lambda x, dtype: x.to(dtype) if x.dtype != dtype else x
@@ -65,7 +73,9 @@ def FB_blur_fusion_foreground_estimator_gpu(image, FG, B, alpha, r=90):
     blurred_B1A = mean_blur(B * (1 - alpha), kernel_size=r)
     blurred_B = blurred_B1A / ((1 - blurred_alpha) + 1e-5)
 
-    FG_output = blurred_FG + alpha * (image - alpha * blurred_FG - (1 - alpha) * blurred_B)
+    FG_output = blurred_FG + alpha * (
+        image - alpha * blurred_FG - (1 - alpha) * blurred_B
+    )
     FG_output = torch.clamp(FG_output, 0, 1)
 
     return as_dtype(FG_output, input_dtype), as_dtype(blurred_B, input_dtype)
@@ -121,23 +131,21 @@ def refine_foreground(image, mask, r=90, device=None):
         )
         estimated_foreground = (estimated_foreground * 255).astype(np.uint8)
 
-    estimated_foreground = Image.fromarray(
-        np.ascontiguousarray(estimated_foreground)
-    )
+    estimated_foreground = Image.fromarray(np.ascontiguousarray(estimated_foreground))
 
     return estimated_foreground
 
 
-def preproc(image, label, preproc_methods=['flip']):
-    if 'flip' in preproc_methods:
+def preproc(image, label, preproc_methods=["flip"]):
+    if "flip" in preproc_methods:
         image, label = cv_random_flip(image, label)
-    if 'crop' in preproc_methods:
+    if "crop" in preproc_methods:
         image, label = random_crop(image, label)
-    if 'rotate' in preproc_methods:
+    if "rotate" in preproc_methods:
         image, label = random_rotate(image, label)
-    if 'enhance' in preproc_methods:
+    if "enhance" in preproc_methods:
         image = color_enhance(image)
-    if 'pepper' in preproc_methods:
+    if "pepper" in preproc_methods:
         image = random_pepper(image)
     return image, label
 
@@ -157,8 +165,11 @@ def random_crop(image, label):
     crop_win_width = np.random.randint(image_width - border, image_width)
     crop_win_height = np.random.randint(image_height - border, image_height)
     random_region = (
-        (image_width - crop_win_width) >> 1, (image_height - crop_win_height) >> 1, (image_width + crop_win_width) >> 1,
-        (image_height + crop_win_height) >> 1)
+        (image_width - crop_win_width) >> 1,
+        (image_height - crop_win_height) >> 1,
+        (image_width + crop_win_width) >> 1,
+        (image_height + crop_win_height) >> 1,
+    )
     return image.crop(random_region), label.crop(random_region)
 
 

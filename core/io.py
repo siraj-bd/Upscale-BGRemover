@@ -1,6 +1,5 @@
 from pathlib import Path
 
-
 SUPPORTED_EXTENSIONS = {
     ".png",
     ".jpg",
@@ -27,10 +26,7 @@ def collect_images(path: str):
             raise ValueError(f"Unsupported image: {path}")
         return [path]
 
-    images = sorted(
-        p for p in path.rglob("*")
-        if p.is_file() and is_image(p)
-    )
+    images = sorted(p for p in path.rglob("*") if p.is_file() and is_image(p))
 
     if not images:
         raise FileNotFoundError("No supported images found.")

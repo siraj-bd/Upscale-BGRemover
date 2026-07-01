@@ -45,6 +45,4 @@ class BiRefNetEngine(BaseEngine):
         print(f"Input : {input_path}")
         print(f"Output: {output_path}")
 
-        raise NotImplementedError(
-            "BiRefNet inference is not connected yet."
-        )
+        raise NotImplementedError("BiRefNet inference is not connected yet.")
