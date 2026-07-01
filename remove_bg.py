@@ -71,9 +71,14 @@ x, y, r = detect_circle(img)
 
 gray = cv2.cvtColor(img[:, :, :3], cv2.COLOR_BGR2GRAY)
 
+def apply_mask(img, mask):
+    img[:, :, 3] = mask
+
+    return img
+
 mask = create_mask(gray.shape, x, y, r)
 
-img[:, :, 3] = mask
+img = apply_mask(img, mask)
 
 Image.fromarray(
     cv2.cvtColor(img, cv2.COLOR_BGRA2RGBA)
