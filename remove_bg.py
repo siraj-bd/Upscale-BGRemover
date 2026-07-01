@@ -1,3 +1,9 @@
+# ==========================================
+# Upscale-BGRemover
+# File    : remove_bg.py
+# Version : v0.0.6
+# ==========================================
+
 import sys
 import cv2
 import numpy as np
@@ -11,6 +17,7 @@ def validate_arguments():
 
     return sys.argv[1], sys.argv[2]
 
+
 def load_image(path):
     img = cv2.imread(path, cv2.IMREAD_UNCHANGED)
 
@@ -18,14 +25,16 @@ def load_image(path):
         print("Image not found.")
         sys.exit(1)
 
-    if img.shape[2] == 3:
+    if len(img.shape) == 2:
+        img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGRA)
+
+    elif img.shape[2] == 3:
         b, g, r = cv2.split(img)
         alpha = np.full(b.shape, 255, dtype=np.uint8)
         img = cv2.merge((b, g, r, alpha))
 
     return img
 
-input_path, output_path = validate_arguments()
 
 def detect_circle(img):
     gray = cv2.cvtColor(img[:, :, :3], cv2.COLOR_BGR2GRAY)
@@ -51,45 +60,54 @@ def detect_circle(img):
     return max(circles, key=lambda c: c[2])
 
 
-img = load_image(input_path)
-
 def create_mask(shape, x, y, r):
     mask = np.zeros(shape, dtype=np.uint8)
 
-    cv2.circle(
-        mask,
-        (x, y),
-        r - 3,
-        255,
-        -1,
-    )
+    cv2.circle(mask, (x, y), r - 3, 255, -1)
 
     return mask
 
-
-x, y, r = detect_circle(img)
-
-gray = cv2.cvtColor(img[:, :, :3], cv2.COLOR_BGR2GRAY)
 
 def apply_mask(img, mask):
     img[:, :, 3] = mask
 
     return img
 
-mask = create_mask(gray.shape, x, y, r)
 
 def save_image(img, output_path):
     Image.fromarray(
         cv2.cvtColor(img, cv2.COLOR_BGRA2RGBA)
     ).save(output_path)
 
-img = apply_mask(img, mask)
 
-save_image(img, output_path)
+def save_debug_image(img, x, y, r):
+    debug = img.copy()
 
-debug = img.copy()
-cv2.circle(debug, (x, y), r, (0, 0, 255, 255), 6)
-cv2.imwrite("debug_circle.png", debug)
-print("Debug image saved: debug_circle.png")
+    cv2.circle(debug, (x, y), r, (0, 0, 255, 255), 6)
 
-print("Saved:", output_path)
+    cv2.imwrite("debug_circle.png", debug)
+    print("Debug image saved: debug_circle.png")
+
+
+def main():
+    input_path, output_path = validate_arguments()
+
+    img = load_image(input_path)
+
+    x, y, r = detect_circle(img)
+
+    gray = cv2.cvtColor(img[:, :, :3], cv2.COLOR_BGR2GRAY)
+
+    mask = create_mask(gray.shape, x, y, r)
+
+    img = apply_mask(img, mask)
+
+    save_image(img, output_path)
+
+    save_debug_image(img, x, y, r)
+
+    print("Saved:", output_path)
+
+
+if __name__ == "__main__":
+    main()
